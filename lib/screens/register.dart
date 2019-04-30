@@ -8,6 +8,7 @@ class Register extends StatefulWidget {
 class _RegisterState extends State<Register> {
   //explicit
   final formKey = GlobalKey<FormState>();
+  String nameString, emailString, passwordString;
 
   Widget nameTextFormField() {
     return TextFormField(
@@ -23,6 +24,9 @@ class _RegisterState extends State<Register> {
           return 'Please fill name!!! ';
         }
       },
+      onSaved: (String value) {
+        nameString = value;
+      },
     );
   }
 
@@ -36,11 +40,17 @@ class _RegisterState extends State<Register> {
           hintText: ('Input your email'),
           icon: Icon(Icons.email, color: Colors.black)),
       validator: (String value) {
+        Pattern pattern =
+            r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+        RegExp regex = new RegExp(pattern);
         if (value.length == 0) {
           return 'Please fill email!!! ';
-        }else if(!((value.contains('@')) && (value.contains('.')))){
-          return 'Email wrong format!!!';
+        } else if (!regex.hasMatch(value)) {
+          return 'Enter valid email format!!!';
         }
+      },
+      onSaved: (String value) {
+        emailString = value;
       },
     );
   }
@@ -57,8 +67,11 @@ class _RegisterState extends State<Register> {
       obscureText: true,
       validator: (String value) {
         if (value.length < 6) {
-          return 'Password morn than 6 Character!!!';
+          return 'Password must be more than 6 character!!!';
         }
+      },
+      onSaved: (String value) {
+        passwordString = value;
       },
     );
   }
@@ -69,7 +82,11 @@ class _RegisterState extends State<Register> {
       tooltip: 'Upload to firebase',
       onPressed: () {
         print("uploadButton");
-        if (formKey.currentState.validate()) {}
+        if (formKey.currentState.validate()) {
+          formKey.currentState.save();
+          print(
+              'name = $nameString,email=$emailString,password=$passwordString');
+        }
       },
     );
   }
