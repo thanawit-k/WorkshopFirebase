@@ -46,7 +46,7 @@ class _AuthenState extends State<Authen> {
           fontFamily: 'IndieFlower',
           fontSize: 25.0,
           fontWeight: FontWeight.bold,
-          color: Colors.red),
+          color: Colors.white),
     );
   }
 
