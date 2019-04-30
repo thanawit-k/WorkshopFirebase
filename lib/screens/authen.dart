@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import './register.dart';
 
 class Authen extends StatefulWidget {
   @override
@@ -22,20 +23,26 @@ class _AuthenState extends State<Authen> {
   }
 
   Widget singinButton() {
-    return RaisedButton(
+    return RaisedButton.icon(
+      icon: Icon(Icons.done),
+      label: Text('Sign in'),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
       color: Colors.greenAccent[400],
-      child: Text('Sign in'),
       onPressed: () {},
     );
   }
 
-  Widget singupButton() {
-    return RaisedButton(
+  Widget singupButton(BuildContext context) {
+    return RaisedButton.icon(
+      icon: Icon(Icons.person_add),
+      label: Text('Sign up'),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
       color: Colors.redAccent,
-      child: Text('Sign up'),
-      onPressed: () {},
+      onPressed: () {
+        var registerRoute =
+          MaterialPageRoute(builder: (BuildContext context) => Register());
+          Navigator.of(context).push(registerRoute);
+      },
     );
   }
 
@@ -61,7 +68,7 @@ class _AuthenState extends State<Authen> {
       body: Container(
         decoration: BoxDecoration(
             gradient: LinearGradient(
-                colors: [Colors.pink[800], Colors.pinkAccent[400]],
+                colors: [Colors.yellow[800], Colors.yellowAccent[400]],
                 begin: Alignment(0, 1))),
         padding: EdgeInsets.only(top: 100.0),
         alignment: Alignment(0, -1),
@@ -77,26 +84,26 @@ class _AuthenState extends State<Authen> {
               child: showAppName(),
             ),
             Container(
-              padding: EdgeInsets.only(left: 50.0, right: 50.0),
+              padding: EdgeInsets.only(left: 20.0, right: 20.0),
               child: emailTextFormField(),
             ),
             Container(
-              padding: EdgeInsets.only(left: 50.0, right: 50.0),
+              padding: EdgeInsets.only(left: 20.0, right: 20.0),
               child: passwordTextFormField(),
             ),
             Container(
-              margin: EdgeInsets.only(left: 50.0, right: 50.0, top: 15.0),
+              margin: EdgeInsets.only(left: 20.0, right: 20.0, top: 15.0),
               child: Row(
                 children: <Widget>[
                   Expanded(
-                    child: Container(
+                      child: Container(
                     margin: EdgeInsets.only(left: 4.0, right: 4.0),
                     child: singinButton(),
                   )),
-                   Expanded(
-                    child: Container(
+                  Expanded(
+                      child: Container(
                     margin: EdgeInsets.only(left: 4.0, right: 4.0),
-                    child: singupButton(),
+                    child: singupButton(context),
                   )),
                 ],
               ),
