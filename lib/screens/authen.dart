@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import './register.dart';
+import './my_service.dart';
 
 class Authen extends StatefulWidget {
   @override
@@ -9,11 +11,38 @@ class Authen extends StatefulWidget {
 class _AuthenState extends State<Authen> {
   // for form
   final formKey = GlobalKey<FormState>();
-
   //constant
   String titleHaveSpace = 'Please fill in the information';
   String titleEmailFalse = 'Input your Email format';
   String titlePasswordFalse = 'Input your password more than 6 character';
+  //explcit
+  String emailString, passwordString;
+  //for firebase
+  final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+  
+  //for snackbar
+  final snackBarKey = GlobalKey<ScaffoldState>();
+  // initial method  check สภาวะ ่าlogin อยู่รึเปล่า
+  @override
+  void initState() {
+    super.initState();
+    print('initState work');
+     checkStatus(context);
+  }
+
+  Future checkStatus(BuildContext context) async {
+    FirebaseUser firebaseUser = await firebaseAuth.currentUser();
+    if (firebaseUser != null) {
+      goToService(context);
+    }
+  }
+
+  void goToService(BuildContext context) {
+    var serviceRoute =
+        MaterialPageRoute(builder: (BuildContext context) => Myservice());
+    Navigator.of(context)
+        .pushAndRemoveUntil(serviceRoute, (Route<dynamic> route) => false);
+  }
 
   Widget emailTextFormField() {
     return TextFormField(
@@ -29,6 +58,9 @@ class _AuthenState extends State<Authen> {
           return titleEmailFalse;
         }
       },
+      onSaved: (String value) {
+        emailString = value;
+      },
     );
   }
 
@@ -42,10 +74,13 @@ class _AuthenState extends State<Authen> {
           return titlePasswordFalse;
         }
       },
+      onSaved: (String value) {
+        passwordString = value;
+      },
     );
   }
 
-  Widget singinButton() {
+  Widget singinButton(BuildContext context) {
     return RaisedButton.icon(
       icon: Icon(Icons.account_circle),
       label: Text('Sign in'),
@@ -53,9 +88,47 @@ class _AuthenState extends State<Authen> {
       color: Colors.greenAccent[400],
       onPressed: () {
         print('You Click Signin');
-        if (formKey.currentState.validate()) {}
+        if (formKey.currentState.validate()) {
+          formKey.currentState.save();
+          //${value} {} เมื่อค่าเอามาคำนวน ${8+1} เป็นต้น
+          print('email ==> ${emailString},password ==> ${passwordString}');
+          checkAuthen(context);
+        }
       },
     );
+  }
+
+  void checkAuthen(BuildContext context) async {
+    FirebaseUser firebaseUser = await firebaseAuth
+        .signInWithEmailAndPassword(
+            email: emailString, password: passwordString)
+        .then((objValue) {
+      print('Success login ==> ${objValue.toString()}');
+      //route with arrow back
+
+      var myServiceRoute =
+          MaterialPageRoute(builder: (BuildContext context) => Myservice());
+      Navigator.of(context)
+          .pushAndRemoveUntil(myServiceRoute, (Route<dynamic> route) => false);
+    }).catchError((objValue) {
+      String error = objValue.message;
+      print('Error ==> $error');
+      showSnackBar(error);
+    });
+  }
+
+  void showSnackBar(String messageString) {
+    SnackBar snackBar = SnackBar(
+      content: Text(messageString),
+      backgroundColor: Colors.redAccent,
+      duration: Duration(seconds: 10),
+      action: SnackBarAction(
+        label: 'Close',
+        textColor: Colors.white,
+        onPressed: () {},
+      ),
+    );
+    snackBarKey.currentState.showSnackBar(snackBar);
   }
 
   Widget singupButton(BuildContext context) {
@@ -90,6 +163,7 @@ class _AuthenState extends State<Authen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        key: snackBarKey,
         resizeToAvoidBottomPadding: false,
         body: Form(
           key: formKey,
@@ -126,7 +200,7 @@ class _AuthenState extends State<Authen> {
                       Expanded(
                           child: Container(
                         margin: EdgeInsets.only(left: 4.0, right: 4.0),
-                        child: singinButton(),
+                        child: singinButton(context),
                       )),
                       Expanded(
                           child: Container(
