@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Register extends StatefulWidget {
   @override
@@ -9,6 +10,10 @@ class _RegisterState extends State<Register> {
   //explicit
   final formKey = GlobalKey<FormState>();
   String nameString, emailString, passwordString;
+  //for firebase
+  final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+  //for snackbar
+  final snackBarKey = GlobalKey<ScaffoldState>();
 
   Widget nameTextFormField() {
     return TextFormField(
@@ -76,7 +81,7 @@ class _RegisterState extends State<Register> {
     );
   }
 
-  Widget uploadButton() {
+  Widget uploadButton(BuildContext context) {
     return IconButton(
       icon: Icon(Icons.cloud_upload),
       tooltip: 'Upload to firebase',
@@ -86,18 +91,47 @@ class _RegisterState extends State<Register> {
           formKey.currentState.save();
           print(
               'name = $nameString,email=$emailString,password=$passwordString');
+          uploadValueToFirebase(context);
         }
       },
     );
   }
 
+  void uploadValueToFirebase(BuildContext context) async {
+    FirebaseUser firebaseUser = await firebaseAuth
+        .createUserWithEmailAndPassword(
+            email: emailString, password: passwordString)
+        .then((user) {
+      print('Register success with $user');
+      Navigator.pop(context);
+    }).catchError((error) {
+      String errorString = error.message;
+      print('Have error ====> $errorString');
+      showSnackBar(errorString);
+    });
+  }
+
+  void showSnackBar(String messageString) {
+    SnackBar snackBar = SnackBar(
+      backgroundColor: Colors.redAccent,
+      duration: Duration(seconds: 10),
+      content: Text(messageString),
+      action: SnackBarAction(
+        label: 'Close',
+        onPressed: () {},
+      ),
+    );
+    snackBarKey.currentState.showSnackBar(snackBar);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        key: snackBarKey,
         resizeToAvoidBottomPadding: false,
         appBar: AppBar(
           title: Text('Register'),
-          actions: <Widget>[uploadButton()],
+          actions: <Widget>[uploadButton(context)],
           backgroundColor: Colors.black,
         ),
         body: Form(
